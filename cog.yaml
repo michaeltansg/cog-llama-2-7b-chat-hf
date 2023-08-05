@@ -1,0 +1,10 @@
+build:
+  gpu: true
+  python_version: "3.11"
+  python_packages:
+    - "torch==2.0.1"
+    - "transformers==4.31.0"
+    - "sentencepiece==0.1.99"
+    - "accelerate==0.21.0"
+
+predict: "predict.py:Predictor"
