@@ -59,15 +59,19 @@ class Predictor(BasePredictor):
         prompt = prompt.strip('\n').lstrip(B_INST).rstrip(E_INST).strip()
         prompt_templated = PROMPT_TEMPLATE.format(system_prompt=system_prompt.strip(), instruction=prompt.strip())
 
-        input = self.tokenizer(prompt_templated, return_tensors="pt").input_ids.to(self.device)
+        inputs = self.tokenizer(prompt_templated, return_tensors="pt").to(self.device)
+        input_ids = inputs["input_ids"]
 
         outputs = self.model.generate(
-            input,
+            **inputs,
             max_length=max_length,
             do_sample=True,
             temperature=temperature,
             top_p=top_p,
             repetition_penalty=repetition_penalty,
         )
-        out = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)
+
+        sliced_outputs = [output[len(input_id):] for output, input_id in zip(outputs, input_ids)]
+
+        out = self.tokenizer.batch_decode(sliced_outputs, skip_special_tokens=True)
         return out
